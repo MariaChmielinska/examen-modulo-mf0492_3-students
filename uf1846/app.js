@@ -26,7 +26,7 @@ app.get('/', async (req, res) => {
 // Endpoint 1: Obtener todos los pacientes en formato JSON en la ruta /api/patients
 app.get('/api/patients', async (req, res) => {
     try {
-        const patients = [];
+        const patients = await Patient.find();
         res.json({
             message: "Query executed successfully",
             results: patients
@@ -42,11 +42,18 @@ app.get('/form', (req, res) => {
 });
 
 // Endpoint 3: Verificar si el paciente existe y mostrar información
+
 app.get('/check', async (req, res) => {
-    
+    const { logRequest } = require('./utils');
+    const ssn = req.query.ssn; 
+    if (!ssn) {
+        return res.status(400).send('Por favor, proporcione un número de la seguridad social');
+    }
     try {
-        const patient = await Patient.findOne();
-        console.log("🚀 ~ file: app.js:52 ~ app.get ~ patient:", patient)
+        console.log(`Searching for patient with SSN: ${ssn}`);
+        const patient = await Patient.findOne({ ssn: ssn });
+        console.log("🚀 ~ file: app.js:52 ~ app.get ~ patient:", patient);
+        logRequest(`Se ha realizado una consulta sobre un paciente con SSN: ${ssn}`);
 
         if (patient) {
             res.render('patient-info', { patient });
